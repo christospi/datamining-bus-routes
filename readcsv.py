@@ -72,6 +72,6 @@ def cleandata():
 
 
 cleandata()
-fasf
-fsafafsa
 
+
+.....
