@@ -1,11 +1,20 @@
 import ast
 import csv
-import re
-
+from math import radians, sin, cos, asin, sqrt
 
 import config
 import pandas as pd
-import numpy as np
+
+
+def haversine_dist(long1, lat1, long2, lat2):
+    long1,long2,lat1,lat2 = map(radians, [long1, lat1, long2, lat2])  #decimal to radians
+
+    difflong = long2-long1
+    difflat = lat2-lat1
+    a = sin(difflat/2)**2 + cos(lat1) * cos(lat2) * sin(difflong/2)**2
+    c = 2 * asin(sqrt(a))
+    rad = 6371 #earth's radius in km
+    return c * rad
 
 def preprocessing():
     df = pd.read_csv(config.trainsetPath)
@@ -13,7 +22,7 @@ def preprocessing():
 
     tripid=0
     with open('trips.csv', 'wb') as csvfile:
-        fieldnames = ['tripId','journeyPatternId','timestamp']
+        fieldnames = ['tripId','journeyPatternId','trajectories']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
         list=[]
@@ -27,7 +36,7 @@ def preprocessing():
 
                 curjid = row['journeyPatternId']
                 if jid!=curjid:
-                    writer.writerow({'tripId': tripid , 'journeyPatternId': jid , 'timestamp': list})
+                    writer.writerow({'tripId': tripid , 'journeyPatternId': jid , 'trajectories': list})
                     list=[]
                     list.append([row['timestamp'], row['longitude'], row['latitude']])
                     tripid+=1
@@ -35,23 +44,31 @@ def preprocessing():
 
                 else:
                     list.append([row['timestamp'], row['longitude'], row['latitude']])
-            writer.writerow({'tripId': tripid, 'journeyPatternId': jid, 'timestamp': list})
+            writer.writerow({'tripId': tripid, 'journeyPatternId': jid, 'trajectories': list})
             list=[]
             tripid+=1
 
 def cleandata():
     df = pd.read_csv('trips.csv')
-    # for i,row in df.iterrows():
-        # print row['timestamp']
-        # a=np.array(row['timestamp'])
-        # l = re.split('\[\[, \]\*\n',a)
 
-    for i, row in df.iterrows():
+    with open('tripsClean.csv', 'wb') as csvfile:
 
-        trajectories = ast.literal_eval(row[2])
-        for j in range(len(trajectories) - 1):
-            print("lat: %25.20f" % float(trajectories[j][1]))
-            print("lon: %25.20f" % float(trajectories[j][2]))
+        fieldnames = ['tripId','journeyPatternId','trajectories']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+
+        for i, row in df.iterrows():
+            maxdist = 0
+            totaldist = 0
+            trajectories = ast.literal_eval(row[2])
+            for j in range(1, len(trajectories)):
+                harvdist = haversine_dist(float(trajectories[j-1][1]), float(trajectories[j-1][2]), float(trajectories[j][1]), float(trajectories[j][2]))
+                totaldist += harvdist
+                if harvdist > maxdist:
+                    maxdist = harvdist
+
+            if( maxdist <=2 and totaldist >= 2):
+                writer.writerow({'tripId': row[0], 'journeyPatternId': row[1], 'trajectories': row[2]})
 
 
 cleandata()
