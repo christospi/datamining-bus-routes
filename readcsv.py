@@ -72,6 +72,3 @@ def cleandata():
 
 
 cleandata()
-4545
-
-.....
