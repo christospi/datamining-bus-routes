@@ -1,11 +1,21 @@
 import ast
 import csv
 import re
-
+from math import radians, sin, cos, asin, sqrt
 
 import config
 import pandas as pd
-import numpy as np
+
+
+def haversine_dist(long1, lat1, long2, lat2):
+    long1,long2,lat1,lat2 = map(radians, [long1, lat1, long2, lat2])  #decimal to radians
+
+    difflong = long2-long1
+    difflat = lat2-lat1
+    a = sin(difflat/2)**2 + cos(lat1) * cos(lat2) * sin(difflong/2)**2
+    c = 2 * asin(sqrt(a))
+    rad = 6371 #earth's radius in km
+    return c * rad
 
 def preprocessing():
     df = pd.read_csv(config.trainsetPath)
