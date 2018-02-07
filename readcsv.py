@@ -11,7 +11,7 @@ with open('trips.csv', 'wb') as csvfile:
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
     writer.writeheader()
     list=[]
-    for veh_id in df['vehicleID']:
+    for veh_id in df.vehicleID.unique():
         for i, row in df[df['vehicleID']==veh_id].iterrows():
             if i==0: jid=row['journeyPatternId']
             curjid = row['journeyPatternId']
@@ -23,6 +23,7 @@ with open('trips.csv', 'wb') as csvfile:
 
             else:
                 list.append([[row['timestamp'], row['longitude'], row['latitude']]])
+
 
 
 
