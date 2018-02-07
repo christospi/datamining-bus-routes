@@ -1,33 +1,28 @@
 import csv
-
+import config
 import pandas as pd
 import numpy as np
 
-df = pd.read_csv('C:\\Users\kwnst\\Desktop\gouno\\train_set.csv')
+df = pd.read_csv(config.trainsetPath)
 df = df[pd.notnull(df['journeyPatternId'])]
 tripid=0
-with open('trips.csv', 'w') as csvfile:
+with open('trips.csv', 'wb') as csvfile:
     fieldnames = ['tripId','journeyPatternId','timestamp']
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
     writer.writeheader()
-    jid=0
+    list=[]
     for veh_id in df['vehicleID']:
-        if tripid>5: break
-        for i, row in df.iterrows():
-            list=[]
-            list.append([[row['timestamp'], row['longitude'], row['latitude']]])
-            if row['vehicleID']==veh_id:
-                curjid = row['journeyPatternId']
-                print curjid
-                if jid!=curjid:
-                    writer.writerow({'tripId': tripid , 'journeyPatternId': curjid , 'timestamp': list})
-                    list=[]
-                    tripid+=1
-                    print tripid
-                    jid=curjid
-                    break
-                else:
-                    list.append([[row['timestamp'], row['longitude'], row['latitude']]])
+        for i, row in df[df['vehicleID']==veh_id].iterrows():
+            if i==0: jid=row['journeyPatternId']
+            curjid = row['journeyPatternId']
+            if jid!=curjid:
+                writer.writerow({'tripId': tripid , 'journeyPatternId': jid , 'timestamp': list})
+                list=[]
+                tripid+=1
+                jid=curjid
+
+            else:
+                list.append([[row['timestamp'], row['longitude'], row['latitude']]])
 
 
 
