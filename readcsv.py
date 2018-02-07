@@ -1,3 +1,4 @@
+import ast
 import csv
 import re
 
@@ -38,22 +39,22 @@ def preprocessing():
             list=[]
             tripid+=1
 
-
 def cleandata():
     df = pd.read_csv('trips.csv')
-    for i,row in df.iterrows():
+    # for i,row in df.iterrows():
         # print row['timestamp']
-        a=np.array(row['timestamp'])
-        l = re.split('\[\[, \]\*\n',a)
+        # a=np.array(row['timestamp'])
+        # l = re.split('\[\[, \]\*\n',a)
 
-        print(l)
+    for i, row in df.iterrows():
+
+        trajectories = ast.literal_eval(row[2])
+        for j in range(len(trajectories) - 1):
+            print("lat: %25.20f" % float(trajectories[j][1]))
+            print("lon: %25.20f" % float(trajectories[j][2]))
+
 
 cleandata()
 
-    # if i['vehicleID']==veh_id :
-       #     print i
-# with open('trips.csv', 'w') as csvfile:
-#     writer = csv.writer(csvfile, delimiter=',')
-#     writer.writerow(['TripId','JourneyPatternId','Timestamp'])
 
 
