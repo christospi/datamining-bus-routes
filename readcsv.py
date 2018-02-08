@@ -63,11 +63,9 @@ def cleandata():
             trajectories = ast.literal_eval(row[2])
             for j in range(1, len(trajectories)):
                 harvdist = haversine_dist(float(trajectories[j-1][1]), float(trajectories[j-1][2]), float(trajectories[j][1]), float(trajectories[j][2]))
-                print harvdist
                 totaldist += harvdist
                 if harvdist > maxdist:
                     maxdist = harvdist
-            print maxdist
             if( maxdist <=2 and totaldist >= 2):
                 writer.writerow({'tripId': row[0], 'journeyPatternId': row[1], 'trajectories': row[2]})
 
