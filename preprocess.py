@@ -80,7 +80,7 @@ def cleandata():
 
         print ("Total Fails: %d (MaxDistance) | %d (TotalDistance)" % (maxfails,totalfails))
 
-def plot_data:
+def plot_data():
     df = pd.read_csv('tripsClean.csv')
 
 # preprocessing()
