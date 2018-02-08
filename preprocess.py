@@ -32,7 +32,6 @@ def preprocessing():
                 if flag:
                     flag=0
                     jid=row['journeyPatternId']
-                    curjid = row['journeyPatternId']
 
                 curjid = row['journeyPatternId']
                 if jid!=curjid:
@@ -49,6 +48,10 @@ def preprocessing():
             tripid+=1
 
 def cleandata():
+
+    maxfails = 0    # Fails due to max distance
+    totalfails = 0  # Fails due to total distance
+
     df = pd.read_csv('trips.csv')
 
     with open('tripsClean.csv', 'wb') as csvfile:
@@ -57,18 +60,29 @@ def cleandata():
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
 
-        for  i,row in df.iterrows():
+        for i,row in df.iterrows():
             maxdist = 0
             totaldist = 0
             trajectories = ast.literal_eval(row[2])
             for j in range(1, len(trajectories)):
+
                 harvdist = haversine_dist(float(trajectories[j-1][1]), float(trajectories[j-1][2]), float(trajectories[j][1]), float(trajectories[j][2]))
+
                 totaldist += harvdist
                 if harvdist > maxdist:
                     maxdist = harvdist
+
+            if maxdist > 2: maxfails+=1
+            if totaldist < 2: totalfails+=1
+
             if( maxdist <=2 and totaldist >= 2):
                 writer.writerow({'tripId': row[0], 'journeyPatternId': row[1], 'trajectories': row[2]})
 
+        print ("Total Fails: %d (MaxDistance) | %d (TotalDistance)" % (maxfails,totalfails))
 
+def plot_data():
+    df = pd.read_csv('tripsClean.csv')
+
+# preprocessing()
 cleandata()
 
