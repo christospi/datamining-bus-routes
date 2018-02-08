@@ -7,14 +7,14 @@ import pandas as pd
 
 
 def haversine_dist(long1, lat1, long2, lat2):
-    long1,long2,lat1,lat2 = map(radians, [long1, lat1, long2, lat2])  #decimal to radians
-
-    difflong = long2-long1
-    difflat = lat2-lat1
+    long1, lat1, long2, lat2 = map(radians, [long1, lat1, long2, lat2])
+    difflong = long2 - long1
+    difflat = lat2 - lat1
     a = sin(difflat/2)**2 + cos(lat1) * cos(lat2) * sin(difflong/2)**2
     c = 2 * asin(sqrt(a))
-    rad = 6371 #earth's radius in km
-    return c * rad
+    r = 6371 # Earth's radius in km
+
+    return c * r
 
 def preprocessing():
     df = pd.read_csv(config.trainsetPath)
@@ -57,18 +57,20 @@ def cleandata():
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
 
-        for i, row in df.iterrows():
+        for  i,row in df.iterrows():
             maxdist = 0
             totaldist = 0
             trajectories = ast.literal_eval(row[2])
             for j in range(1, len(trajectories)):
                 harvdist = haversine_dist(float(trajectories[j-1][1]), float(trajectories[j-1][2]), float(trajectories[j][1]), float(trajectories[j][2]))
+                print harvdist
                 totaldist += harvdist
                 if harvdist > maxdist:
                     maxdist = harvdist
-
+            print maxdist
             if( maxdist <=2 and totaldist >= 2):
                 writer.writerow({'tripId': row[0], 'journeyPatternId': row[1], 'trajectories': row[2]})
 
 
 cleandata()
+
