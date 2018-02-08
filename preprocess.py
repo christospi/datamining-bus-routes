@@ -1,11 +1,14 @@
-import ast
-import csv
 from math import radians, sin, cos, asin, sqrt
 
+import gmplot as gmplot
 import config
 import pandas as pd
+import ast
+import csv
 
-
+########################################################################################################################
+#                                       Harvesine Distance Function                                                    #
+########################################################################################################################
 def haversine_dist(long1, lat1, long2, lat2):
     long1, lat1, long2, lat2 = map(radians, [long1, lat1, long2, lat2])
     difflong = long2 - long1
@@ -13,9 +16,11 @@ def haversine_dist(long1, lat1, long2, lat2):
     a = sin(difflat/2)**2 + cos(lat1) * cos(lat2) * sin(difflong/2)**2
     c = 2 * asin(sqrt(a))
     r = 6371 # Earth's radius in km
-
     return c * r
 
+########################################################################################################################
+#                                           Preprocessing Function                                                     #
+########################################################################################################################
 def preprocessing():
     df = pd.read_csv(config.trainsetPath)
     df = df[pd.notnull(df['journeyPatternId'])]
@@ -25,7 +30,7 @@ def preprocessing():
         fieldnames = ['tripId','journeyPatternId','trajectories']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
-        list=[]
+        jlist=[]
         for veh_id in df.vehicleID.unique():
             flag=1
             for i, row in df[df['vehicleID']==veh_id].iterrows():
@@ -35,18 +40,21 @@ def preprocessing():
 
                 curjid = row['journeyPatternId']
                 if jid!=curjid:
-                    writer.writerow({'tripId': tripid , 'journeyPatternId': jid , 'trajectories': list})
-                    list=[]
-                    list.append([row['timestamp'], row['longitude'], row['latitude']])
+                    writer.writerow({'tripId': tripid , 'journeyPatternId': jid , 'trajectories': jlist})
+                    jlist=[]
+                    jlist.append([row['timestamp'], row['longitude'], row['latitude']])
                     tripid+=1
                     jid=curjid
 
                 else:
-                    list.append([row['timestamp'], row['longitude'], row['latitude']])
-            writer.writerow({'tripId': tripid, 'journeyPatternId': jid, 'trajectories': list})
-            list=[]
+                    jlist.append([row['timestamp'], row['longitude'], row['latitude']])
+            writer.writerow({'tripId': tripid, 'journeyPatternId': jid, 'trajectories': jlist})
+            jlist=[]
             tripid+=1
 
+########################################################################################################################
+#                                           Cleaning Data Function                                                     #
+########################################################################################################################
 def cleandata():
 
     maxfails = 0    # Fails due to max distance
@@ -80,9 +88,34 @@ def cleandata():
 
         print ("Total Fails: %d (MaxDistance) | %d (TotalDistance)" % (maxfails,totalfails))
 
+########################################################################################################################
+#                                               Plot Data Function                                                     #
+########################################################################################################################
 def plot_data():
+
     df = pd.read_csv('tripsClean.csv')
+    plotcount = 0
+
+    for jid in df.journeyPatternId.unique():
+        for i, row in df[df['journeyPatternId'] == jid].iterrows():
+            trajectory = ast.literal_eval(row[2])
+            longlist = []
+            latlist = []
+
+            for j in range(0, len(trajectory)):
+                longlist.append(float(trajectory[j][1]))
+                latlist.append(float(trajectory[j][2]))
+
+            gmap = gmplot.GoogleMapPlotter(latlist[0], longlist[0], 10, 'AIzaSyDf6Dk2_fg0p8XaEhQdFVCXg-AMlm54dAs')
+            gmap.plot(latlist, longlist, 'green', edge_width=5)
+            gmap.draw('gmplotMaps/map-tripID' + str(i) + '.html')
+            break
+
+        plotcount += 1
+        if plotcount == 5: break
+
+########################################################################################################################
 
 # preprocessing()
-cleandata()
-
+# cleandata()
+# plot_data()
