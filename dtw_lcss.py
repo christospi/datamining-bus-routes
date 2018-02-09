@@ -137,14 +137,14 @@ def lcs_worker(i, t_row, df, df_test):
     tlong = []
     t_trajectories = ast.literal_eval(t_row[0])
     subseqs = []
-    a=1
+
 
     # Collect in list all the trajectories for this trip
     for j in range(0, len(t_trajectories)):
         test_list.append([float(t_trajectories[j][1]), float(t_trajectories[j][2])])
         tlong.append(float(t_trajectories[j][1]))
         tlat.append(float(t_trajectories[j][2]))
-    testrun = 0
+
     # Iterate over all trips in tripsClean
     start = time.time()
     for k, row in df.iterrows():
@@ -153,17 +153,15 @@ def lcs_worker(i, t_row, df, df_test):
 
         for l in range(0, len(trajectories)):
             clean_list.append([float(trajectories[l][1]), float(trajectories[l][2])])
+
         m = len(clean_list)
         n = len(test_list)
-
         lt =LCS(clean_list,test_list)
         if (lt[m][n]==0): continue
-        # print "lt[m][n]", lt[m][n]
         sub = backTrack(lt, clean_list, test_list, m, n)
         subseqs.append((lt[m][n],sub, row[1], row[0]))
-        # print "subseqs " ,subseqs
-        testrun += 1
-        if testrun ==10:break
+
+
     print "subseqs2",subseqs
     subseqs = sorted(subseqs,reverse=True)
     print subseqs[:5]
@@ -185,9 +183,9 @@ def lcs_worker(i, t_row, df, df_test):
                 longlist.append(float(gtrajectory[j][1]))
                 latlist.append(float(gtrajectory[j][2]))
 
-            gmap = gmplot.GoogleMapPlotter(latlist[0], longlist[0], 10, 'AIzaSyDf6Dk2_fg0p8XaEhQdFVCXg-AMlm54dAs')
-            gmap.plot(latlist, longlist, 'green', edge_width=5)
-            gmap.plot(tlat, tlong, 'red', edge_width=5)
+            gmap = gmplot.GoogleMapPlotter(latlist[0], longlist[0], 11, 'AIzaSyDf6Dk2_fg0p8XaEhQdFVCXg-AMlm54dAs')
+            gmap.plot(latlist, longlist, '#0284ff', edge_width=5)
+            gmap.plot(tlat, tlong, '#f142f4', edge_width=5)
             gmap.draw('Maps/lcsMaps/testTrip' + str(i+1) + '/neighbour' + str(n+1) + '-' + str(grow[1]) + '.html')
 
             f.write ("Neighbor %d \nJP_ID: %s \n#Matching Points: %d\n" % (n ,grow[1],float(subseqs[n][0])))
