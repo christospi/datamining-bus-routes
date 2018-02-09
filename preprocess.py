@@ -108,7 +108,7 @@ def plot_data():
 
             gmap = gmplot.GoogleMapPlotter(latlist[0], longlist[0], 10, 'AIzaSyDf6Dk2_fg0p8XaEhQdFVCXg-AMlm54dAs')
             gmap.plot(latlist, longlist, 'green', edge_width=5)
-            gmap.draw('gmplotMaps/map-tripID' + str(i) + '.html')
+            gmap.draw('Maps/gmplotMaps/map-tripID' + str(i) + '.html')
             break
 
         plotcount += 1
