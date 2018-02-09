@@ -118,4 +118,4 @@ def plot_data():
 
 # preprocessing()
 # cleandata()
-# plot_data()
+plot_data()
