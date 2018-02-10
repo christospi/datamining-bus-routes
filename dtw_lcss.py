@@ -56,6 +56,7 @@ def dtw_worker(i, t_row, df, df_test):
         # dist, path = fdtw.fastdtw(test_list, clean_list, dist=lambda c1, c2: prep.haversine_dist(c1[0], c1[1], c2[0], c2[1]))
 
         neighbours.append([int(row[0]), dist])
+
     end = time.time()
 
     neighbours = np.asarray(neighbours)
@@ -192,5 +193,5 @@ def lcs_worker(i, t_row, df, df_test):
 
 
 # find . -name "*.html" -type f -delete
-lcs_compute()
-# dtw_compute()
+# lcs_compute()
+dtw_compute()
