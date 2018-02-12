@@ -1,16 +1,18 @@
-import threading
+"""
+BigDataMining - Part 2.A
+(A.1) - Find nearest neighbours (DTW)
+(A.2) - Find Longest Common Subsequence (LCS)
+"""
 
+import threading
 import dtw as dtw
 import pandas as pd
 import numpy as np
 import gmplot as gmplot
 import time
-
 import config
 import ast
 import preprocess as prep
-import fastdtw as fdtw
-
 
 ########################################################################################################################
 #                                    DTW Function + Thread-Work Function                                               #
@@ -26,7 +28,7 @@ def dtw_compute():
         threads.append(t)
         t.start()
 
-
+########################################################################################################################
 def dtw_worker(i, t_row, df, df_test):
     print 'Worker:', i
     test_list = []
@@ -61,6 +63,7 @@ def dtw_worker(i, t_row, df, df_test):
 
     neighbours = np.asarray(neighbours)
     neighbours = neighbours[neighbours[:, 1].argsort()][:5]
+
     print neighbours
     gmap = gmplot.GoogleMapPlotter(tlat[0], tlong[0], 10, 'AIzaSyDf6Dk2_fg0p8XaEhQdFVCXg-AMlm54dAs')
     gmap.plot(tlat, tlong, 'green', edge_width=5)
@@ -89,6 +92,8 @@ def dtw_worker(i, t_row, df, df_test):
 
 
 ########################################################################################################################
+#                               LCS implemented through 3 functions + Thread-Work Function                             #
+########################################################################################################################
 def lcs(c_tr, t_tr):
     m = len(c_tr)
     n = len(t_tr)
@@ -105,7 +110,7 @@ def lcs(c_tr, t_tr):
                 matches[i][j] = max(matches[i][j - 1], matches[i - 1][j])
     return matches
 
-
+########################################################################################################################
 def backtrack(matches, c_tr, t_tr, i, j):
     dist = prep.haversine_dist(float(c_tr[i - 1][0]), float(c_tr[i - 1][1]), float(t_tr[j - 1][0]), float(t_tr[j - 1][1]))
     if i == 0 or j == 0:
@@ -118,7 +123,7 @@ def backtrack(matches, c_tr, t_tr, i, j):
         else:
             return backtrack(matches, c_tr, t_tr, i - 1, j)
 
-
+########################################################################################################################
 def lcs_compute():
     df = pd.read_csv('tripsClean.csv')
     df_test = pd.read_csv(config.testseta2Path, delimiter='/')
@@ -130,7 +135,7 @@ def lcs_compute():
         threads.append(t)
         t.start()
 
-
+########################################################################################################################
 def lcs_worker(i, t_row, df, df_test):
     print "Worker", i
     test_list = []
@@ -191,7 +196,8 @@ def lcs_worker(i, t_row, df, df_test):
             f.write("dt: %8.5f\n\n" % float(end - start))
     f.close()
 
+########################################################################################################################
 
-# find . -name "*.html" -type f -delete
+# dtw_compute()
 # lcs_compute()
-dtw_compute()
+

@@ -1,3 +1,9 @@
+"""
+BigDataMining - Part 2.BC
+(B) - Features extract for classification
+(C) - Classification
+"""
+
 import ast
 import csv
 from sklearn import preprocessing
@@ -16,7 +22,9 @@ import preprocess as prep
 import pandas as pd
 from gmplot import gmplot
 
-
+########################################################################################################################
+#                                  Function to find min long/lat to use in grid                                        #
+########################################################################################################################
 def min_borders():
     df = pd.read_csv('tripsClean.csv')
     lat = []
@@ -28,11 +36,13 @@ def min_borders():
             lon.append(float(trajectories[j][1]))
             lat.append(float(trajectories[j][2]))
             clean_list.append([float(trajectories[j][1]), float(trajectories[j][2])])
-    print "to min lat einai: ", min(lat)
-    print "to min lon einai: ", min(lon)
+    print "Minimum lat. is: ", min(lat)
+    print "Minimum long. is: ", min(lon)
     return min(lat), min(lon)
 
-
+########################################################################################################################
+#                                  Functions to extract features from data files                                       #
+########################################################################################################################
 def features_extract():
     filename = 'C_tripsClean.csv'
     with open(filename, 'wb') as csvfile:
@@ -51,7 +61,7 @@ def features_extract():
                 c += str("C" + str(int(dx)) + "," + str(int(dy)) + ";")
             writer.writerow({'tripId': row[0], 'journeyPatternId': row[1], 'cells': c})
 
-
+########################################################################################################################
 def testset_features():
     minlat, minlon = min_borders()
     filename = 'C_test.csv'
@@ -69,17 +79,19 @@ def testset_features():
                 c += str("C" + str(int(dx)) + "," + str(int(dy)) + ";")
             writer.writerow({'tripId': row[0], 'cells': c})
 
-
+########################################################################################################################
 def cell_pick(minlon, minlat, lon, lat, csize):
     distx = prep.haversine_dist(float(minlon), float(lat), float(minlon), float(minlat))
     disty = prep.haversine_dist(float(lon), float(minlat), float(minlon), float(minlat))
     return distx // csize, disty // csize
 
-
+########################################################################################################################
+#                                  Functions for Classification and Prediction                                         #
+########################################################################################################################
 def my_tokenizer(s):
     return s.split(';')
 
-
+########################################################################################################################
 def classify():
     df = pd.read_csv('C_tripsClean.csv')
     # df = pd.read_csv('C_tripsClean_v5.csv')
@@ -91,33 +103,43 @@ def classify():
     y_train = label.transform(df['journeyPatternId'])
     for jid in df['journeyPatternId']:
         target_cat.append(jid)
-    vec1 = CountVectorizer(tokenizer=my_tokenizer, ngram_range=(2, 2))
-    vec2 = HashingVectorizer(tokenizer=my_tokenizer, ngram_range=(2, 2))
+    countVect = CountVectorizer(tokenizer=my_tokenizer, ngram_range=(2, 2))
+    hashVect = HashingVectorizer(tokenizer=my_tokenizer, ngram_range=(2, 2))
 
-    cl_knn1 = Pipeline([('vect', vec1),
+    # Count Vectorizer + Tfidf + KNN
+    cl_knn1 = Pipeline([('vect', countVect),
                         ('tfidf', TfidfTransformer()),
                         ('clf', KNeighborsClassifier())])
-    cl_knn2 = Pipeline([('vect', vec2),
+    # Hashing Vectorizer + Tfidf + KNN
+    cl_knn2 = Pipeline([('vect', hashVect),
                         ('tfidf', TfidfTransformer()),
                         ('clf', KNeighborsClassifier())])
-    cl_lgr1 = Pipeline([('vect', vec1),
+    # Count Vectorizer + Logistic Regression
+    cl_lgr1 = Pipeline([('vect', countVect),
                         ('clf', LogisticRegression())])
-    cl_lgr2 = Pipeline([('vect', vec2),
+    # Hashing Vectorizer + Logistic Regression
+    cl_lgr2 = Pipeline([('vect', hashVect),
                         ('clf', LogisticRegression())])
-    cl_lgr1tf = Pipeline([('vect', vec1),
+    # Count Vectorizer + Tfidf + Logistic Regression
+    cl_lgr1tf = Pipeline([('vect', countVect),
                           ('tfidf', TfidfTransformer()),
                         ('clf', LogisticRegression())])
-    cl_lgr2tf = Pipeline([('vect', vec2),
+    # Hashing Vectorizer + Tfidf + Logistic Regression
+    cl_lgr2tf = Pipeline([('vect', hashVect),
                           ('tfidf', TfidfTransformer()),
                         ('clf', LogisticRegression())])
-    cl_rf1 = Pipeline([('vect', vec1),
+    # Count Vectorizer + Random Forest
+    cl_rf1 = Pipeline([('vect', countVect),
                        ('clf', RandomForestClassifier())])
-    cl_rf2 = Pipeline([('vect', vec2),
+    # Hashing Vectorizer + Random Forest
+    cl_rf2 = Pipeline([('vect', hashVect),
                        ('clf', RandomForestClassifier())])
-    cl_rf1tf = Pipeline([('vect', vec1),
+    # Count Vectorizer + Tfidf + Random Forest
+    cl_rf1tf = Pipeline([('vect', countVect),
                          ('tfidf', TfidfTransformer()),
                        ('clf', RandomForestClassifier())])
-    cl_rf2tf = Pipeline([('vect', vec2),
+    # Hashing Vectorizer + Tfidf + Random Forest
+    cl_rf2tf = Pipeline([('vect', hashVect),
                          ('tfidf', TfidfTransformer()),
                        ('clf', RandomForestClassifier())])
 
@@ -154,6 +176,7 @@ def classify():
     accrf = scores.mean()
     print("lgr2: Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
 
+########################################################################################################################
 def predict(clf, x_train, y_train, target_cat):
     testdata = pd.read_csv('C_test.csv')
     # target_cat = np.array(target_cat)
@@ -175,6 +198,8 @@ def predict(clf, x_train, y_train, target_cat):
             writer.writerow({'Test_Trip_ID': test_tripid[i], 'Predicted_JourneyPatternID': row})
             i+=1
 
+########################################################################################################################
+
 # testset_features()
 # features_extract()
-classify()
+# classify()

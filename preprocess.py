@@ -1,5 +1,11 @@
-from math import radians, sin, cos, asin, sqrt
+"""
+BigDataMining - Part 1
+(A) - Data preprocessing
+(B) - Data clean-up
+(C) - Data visualization through gmplot
+"""
 
+from math import radians, sin, cos, asin, sqrt
 import gmplot as gmplot
 import config
 import pandas as pd
@@ -23,7 +29,7 @@ def haversine_dist(long1, lat1, long2, lat2):
 ########################################################################################################################
 def preprocessing():
     df = pd.read_csv(config.trainsetPath)
-    df = df[pd.notnull(df['journeyPatternId'])]
+    df = df[pd.notnull(df['journeyPatternId'])] # Removes rows with null values
 
     tripid=0
     with open('trips.csv', 'wb') as csvfile:
@@ -56,7 +62,6 @@ def preprocessing():
 #                                           Cleaning Data Function                                                     #
 ########################################################################################################################
 def cleandata():
-
     maxfails = 0    # Fails due to max distance
     totalfails = 0  # Fails due to total distance
 
@@ -74,6 +79,7 @@ def cleandata():
             trajectories = ast.literal_eval(row[2])
             for j in range(1, len(trajectories)):
 
+                # Compute distance between the two points
                 harvdist = haversine_dist(float(trajectories[j-1][1]), float(trajectories[j-1][2]), float(trajectories[j][1]), float(trajectories[j][2]))
 
                 totaldist += harvdist
@@ -92,7 +98,6 @@ def cleandata():
 #                                               Plot Data Function                                                     #
 ########################################################################################################################
 def plot_data():
-
     df = pd.read_csv('tripsClean.csv')
     plotcount = 0
 
@@ -106,7 +111,7 @@ def plot_data():
                 longlist.append(float(trajectory[j][1]))
                 latlist.append(float(trajectory[j][2]))
 
-            gmap = gmplot.GoogleMapPlotter(latlist[0], longlist[0], 10, 'AIzaSyDf6Dk2_fg0p8XaEhQdFVCXg-AMlm54dAs')
+            gmap = gmplot.GoogleMapPlotter(latlist[0], longlist[0], 12, 'AIzaSyDf6Dk2_fg0p8XaEhQdFVCXg-AMlm54dAs')
             gmap.plot(latlist, longlist, 'green', edge_width=5)
             gmap.draw('Maps/gmplotMaps/map-tripID' + str(i) + '.html')
             break
@@ -118,4 +123,4 @@ def plot_data():
 
 # preprocessing()
 # cleandata()
-plot_data()
+# plot_data()
