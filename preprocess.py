@@ -101,7 +101,7 @@ def plot_data():
     df = pd.read_csv('tripsClean.csv')
     plotcount = 0
 
-    for jid in df.journeyPatternId.unique():
+    for jid in df.journeyPatternId.unique()[::66]:
         for i, row in df[df['journeyPatternId'] == jid].iterrows():
             trajectory = ast.literal_eval(row[2])
             longlist = []
@@ -114,6 +114,7 @@ def plot_data():
             gmap = gmplot.GoogleMapPlotter(latlist[0], longlist[0], 12, 'AIzaSyDf6Dk2_fg0p8XaEhQdFVCXg-AMlm54dAs')
             gmap.plot(latlist, longlist, 'green', edge_width=5)
             gmap.draw('Maps/gmplotMaps/map-tripID' + str(i) + '.html')
+            print jid
             break
 
         plotcount += 1

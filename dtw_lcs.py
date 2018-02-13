@@ -30,7 +30,7 @@ def dtw_compute():
 
 ########################################################################################################################
 def dtw_worker(i, t_row, df, df_test):
-    print 'Worker:', i
+    # print 'Worker:', i
     test_list = []
     neighbours = []
     tlat = []
@@ -64,11 +64,11 @@ def dtw_worker(i, t_row, df, df_test):
     neighbours = np.asarray(neighbours)
     neighbours = neighbours[neighbours[:, 1].argsort()][:5]
 
-    print neighbours
+    # print neighbours
     gmap = gmplot.GoogleMapPlotter(tlat[0], tlong[0], 10, 'AIzaSyDf6Dk2_fg0p8XaEhQdFVCXg-AMlm54dAs')
     gmap.plot(tlat, tlong, 'green', edge_width=5)
     gmap.draw('Maps/dtwMaps/testTrip' + str(i + 1) + '/test-' + str(i + 1) + '.html')
-    print "Test Trip ", i, "\n"
+    # print "Test Trip ", i, "\n"
     filename = 'Maps/dtwMaps/testTrip' + str(i + 1) + '/data' + str(i + 1) + '.txt'
     open(filename, 'w').close()
     f = open(filename, "a+")
@@ -137,7 +137,7 @@ def lcs_compute():
 
 ########################################################################################################################
 def lcs_worker(i, t_row, df, df_test):
-    print "Worker", i
+    # print "Worker", i
     test_list = []
     tlat = []
     tlong = []
@@ -166,14 +166,14 @@ def lcs_worker(i, t_row, df, df_test):
         sub = backtrack(lt, clean_list, test_list, m, n)
         subseqs.append((lt[m][n], sub, row[1], row[0]))
 
-    print "subseqs2", subseqs
+    # print "subseqs2", subseqs
     subseqs = sorted(subseqs, reverse=True)
-    print subseqs[:5]
+    # print subseqs[:5]
     end = time.time()
     gmap = gmplot.GoogleMapPlotter(tlat[0], tlong[0], 10, 'AIzaSyDf6Dk2_fg0p8XaEhQdFVCXg-AMlm54dAs')
     gmap.plot(tlat, tlong, 'green', edge_width=5)
     gmap.draw('Maps/lcsMaps/testTrip' + str(i + 1) + '/test-' + str(i + 1) + '.html')
-    print "Test Trip ", i, "\n"
+    # print "Test Trip ", i, "\n"
     filename = 'Maps/lcsMaps/testTrip' + str(i + 1) + '/data' + str(i + 1) + '.txt'
     open(filename, 'w').close()
     f = open(filename, "a+")

@@ -6,13 +6,17 @@ BigDataMining - Part 2.BC
 
 import ast
 import csv
+
+import time
 from sklearn import preprocessing
 from sklearn.decomposition import TruncatedSVD
 from sklearn.model_selection import cross_val_score
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import CountVectorizer, HashingVectorizer, TfidfTransformer
 from sklearn.linear_model import LogisticRegression
+from sklearn.naive_bayes import MultinomialNB
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.neural_network import MLPClassifier
 from sklearn.pipeline import Pipeline
 from math import sqrt
 import config
@@ -103,16 +107,16 @@ def classify():
     y_train = label.transform(df['journeyPatternId'])
     for jid in df['journeyPatternId']:
         target_cat.append(jid)
-    countVect = CountVectorizer(tokenizer=my_tokenizer, ngram_range=(2, 2))
-    hashVect = HashingVectorizer(tokenizer=my_tokenizer, ngram_range=(2, 2))
 
-    # Count Vectorizer + Tfidf + KNN
+
+    countVect = CountVectorizer(tokenizer=my_tokenizer)
+    hashVect = HashingVectorizer(tokenizer=my_tokenizer)
+
+    # Count Vectorizer + KNN
     cl_knn1 = Pipeline([('vect', countVect),
-                        ('tfidf', TfidfTransformer()),
                         ('clf', KNeighborsClassifier())])
-    # Hashing Vectorizer + Tfidf + KNN
+    # Hashing Vectorizer + KNN
     cl_knn2 = Pipeline([('vect', hashVect),
-                        ('tfidf', TfidfTransformer()),
                         ('clf', KNeighborsClassifier())])
     # Count Vectorizer + Logistic Regression
     cl_lgr1 = Pipeline([('vect', countVect),
@@ -120,65 +124,73 @@ def classify():
     # Hashing Vectorizer + Logistic Regression
     cl_lgr2 = Pipeline([('vect', hashVect),
                         ('clf', LogisticRegression())])
-    # Count Vectorizer + Tfidf + Logistic Regression
-    cl_lgr1tf = Pipeline([('vect', countVect),
-                          ('tfidf', TfidfTransformer()),
-                        ('clf', LogisticRegression())])
-    # Hashing Vectorizer + Tfidf + Logistic Regression
-    cl_lgr2tf = Pipeline([('vect', hashVect),
-                          ('tfidf', TfidfTransformer()),
-                        ('clf', LogisticRegression())])
     # Count Vectorizer + Random Forest
     cl_rf1 = Pipeline([('vect', countVect),
                        ('clf', RandomForestClassifier())])
     # Hashing Vectorizer + Random Forest
     cl_rf2 = Pipeline([('vect', hashVect),
                        ('clf', RandomForestClassifier())])
-    # Count Vectorizer + Tfidf + Random Forest
-    cl_rf1tf = Pipeline([('vect', countVect),
-                         ('tfidf', TfidfTransformer()),
-                       ('clf', RandomForestClassifier())])
-    # Hashing Vectorizer + Tfidf + Random Forest
-    cl_rf2tf = Pipeline([('vect', hashVect),
-                         ('tfidf', TfidfTransformer()),
-                       ('clf', RandomForestClassifier())])
 
+    # Hashing Vectorizer + MPLPC classifier
+    cl_mlp = Pipeline([('vect', hashVect),
+                       ('clf', MLPClassifier(hidden_layer_sizes=(100, 100, 100), max_iter=500, alpha=0.0001,
+                                             solver='sgd', verbose=10, random_state=21, tol=0.000000001))
+                       ])
 
+    start = time.time()
     scores = cross_val_score(cl_knn1, x_train, y_train, cv=10)
     accrf = scores.mean()
-    print("KNN1: Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
+    end = time.time()
+    print("KNN + CountVect: Accuracy: %0.2f (+/- %0.2f) | dt = %f s" % (scores.mean(), scores.std() * 2, float(end - start)))
+
+    start = time.time()
     scores = cross_val_score(cl_knn2, x_train, y_train, cv=10)
     accrf = scores.mean()
-    print("KNN2: Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
-    scores = cross_val_score(cl_rf1, x_train, y_train, cv=10)
-    accrf = scores.mean()
-    print("rf1: Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
-    scores = cross_val_score(cl_rf2, x_train, y_train, cv=10)
-    accrf = scores.mean()
-    print("rf2: Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
-    scores = cross_val_score(cl_rf2tf, x_train, y_train, cv=10)
-    accrf = scores.mean()
-    print("rf2tf: Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
-    scores = cross_val_score(cl_rf1tf, x_train, y_train, cv=10)
-    accrf = scores.mean()
-    print("rf1tf: Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
-    scores = cross_val_score(cl_lgr1tf, x_train, y_train, cv=10)
-    accrf = scores.mean()
-    print("lgr1tf: Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
-    scores = cross_val_score(cl_lgr2tf, x_train, y_train, cv=10)
-    accrf = scores.mean()
-    print("lgr2tf: Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
+    end = time.time()
+    print("KNN + HashVect: Accuracy: %0.2f (+/- %0.2f) | dt = %f s" % (scores.mean(), scores.std() * 2, float(end - start)))
+
+    start = time.time()
     scores = cross_val_score(cl_lgr1, x_train, y_train, cv=10)
     accrf = scores.mean()
-    print("lgr1: Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
+    end = time.time()
+    print("LGR + CountVect: Accuracy: %0.2f (+/- %0.2f) | dt = %f s" % (scores.mean(), scores.std() * 2, float(end - start)))
+
+    start = time.time()
     scores = cross_val_score(cl_lgr2, x_train, y_train, cv=10)
     accrf = scores.mean()
-    print("lgr2: Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
+    end = time.time()
+    print("LGR + HashVect: Accuracy: %0.2f (+/- %0.2f) | dt = %f s" % (scores.mean(), scores.std() * 2, float(end - start)))
 
-    # predict(cl_knn2, x_train, target_cat,1)
-    # predict(cl_rf1, x_train,  target_cat, 2)
-    # predict(cl_rf2, x_train,  target_cat,3)
+    start = time.time()
+    scores = cross_val_score(cl_rf1, x_train, y_train, cv=10)
+    accrf = scores.mean()
+    end = time.time()
+    print("RF + CountVect: Accuracy: %0.2f (+/- %0.2f) | dt = %f s" % (scores.mean(), scores.std() * 2, float(end - start)))
+
+    start = time.time()
+    scores = cross_val_score(cl_rf2, x_train, y_train, cv=10)
+    accrf = scores.mean()
+    end = time.time()
+    print("RF + HashVect: Accuracy: %0.2f (+/- %0.2f) | dt = %f s" % (scores.mean(), scores.std() * 2, float(end - start)))
+
+    # start = time.time()
+    # scores = cross_val_score(cl_mlp, x_train, y_train, cv=10)
+    # accrf = scores.mean()
+    # end = time.time()
+    # print("cl_mlp: Accuracy: %0.2f (+/- %0.2f) | dt = %f s" % (scores.mean(), scores.std() * 2, float(end - start)))
+
+    # start = time.time()
+    # predict(cl_knn2, x_train, target_cat, 1)
+    # end = time.time()
+    # start = time.time()
+    # predict(cl_rf1, x_train, target_cat, 2)
+    # end = time.time()
+    # start = time.time()
+    # predict(cl_rf2, x_train, target_cat, 3)
+    # end = time.time()
+    # start = time.time()
     # predict(cl_knn1, x_train, target_cat, 4)
+    # end = time.time()
 ########################################################################################################################
 def predict(clf, x_train,  target_cat,i):
     testdata = pd.read_csv('C_test.csv')
@@ -191,9 +203,8 @@ def predict(clf, x_train,  target_cat,i):
     predictions = clf.predict(test)
     with open('testSet_JourneyPatternIDs'+str(i)+'.csv', 'w') as csvfile:
 
-        writer = csv.writer(csvfile, delimiter='\t')
         fieldnames=['Test_Trip_ID',  'Predicted_JourneyPatternID']
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter='\t')
         writer.writeheader()
 
         i=0
@@ -205,4 +216,4 @@ def predict(clf, x_train,  target_cat,i):
 
 # testset_features()
 # features_extract()
-# classify()
+classify()
