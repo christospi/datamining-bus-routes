@@ -143,17 +143,16 @@ def classify():
                          ('tfidf', TfidfTransformer()),
                        ('clf', RandomForestClassifier())])
 
-    # predict(cl_knn2, x_train, y_train, target_cat)
-    # scores = cross_val_score(cl_knn1, x_train, y_train, cv=10)
-    # accrf = scores.mean()
-    # print("KNN1: Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
-    # scores = cross_val_score(cl_knn2, x_train, y_train, cv=10)
-    # accrf = scores.mean()
-    # print("KNN2: Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
+
+    scores = cross_val_score(cl_knn1, x_train, y_train, cv=10)
+    accrf = scores.mean()
+    print("KNN1: Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
+    scores = cross_val_score(cl_knn2, x_train, y_train, cv=10)
+    accrf = scores.mean()
+    print("KNN2: Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
     scores = cross_val_score(cl_rf1, x_train, y_train, cv=10)
     accrf = scores.mean()
     print("rf1: Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
-    # predict(cl_rf1, x_train, y_train, target_cat)
     scores = cross_val_score(cl_rf2, x_train, y_train, cv=10)
     accrf = scores.mean()
     print("rf2: Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
@@ -176,8 +175,12 @@ def classify():
     accrf = scores.mean()
     print("lgr2: Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
 
+    # predict(cl_knn2, x_train, target_cat,1)
+    # predict(cl_rf1, x_train,  target_cat, 2)
+    # predict(cl_rf2, x_train,  target_cat,3)
+    # predict(cl_knn1, x_train, target_cat, 4)
 ########################################################################################################################
-def predict(clf, x_train, y_train, target_cat):
+def predict(clf, x_train,  target_cat,i):
     testdata = pd.read_csv('C_test.csv')
     # target_cat = np.array(target_cat)
     test_tripid = []
@@ -186,7 +189,7 @@ def predict(clf, x_train, y_train, target_cat):
     clf.fit(x_train,  target_cat)
     test = testdata['cells']
     predictions = clf.predict(test)
-    with open('testSet_JourneyPatternIDs.csv', 'w') as csvfile:
+    with open('testSet_JourneyPatternIDs'+str(i)+'.csv', 'w') as csvfile:
 
         writer = csv.writer(csvfile, delimiter='\t')
         fieldnames=['Test_Trip_ID',  'Predicted_JourneyPatternID']
