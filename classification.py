@@ -14,7 +14,6 @@ from sklearn.model_selection import cross_val_score
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import CountVectorizer, HashingVectorizer, TfidfTransformer
 from sklearn.linear_model import LogisticRegression
-from sklearn.naive_bayes import MultinomialNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.pipeline import Pipeline
@@ -136,6 +135,7 @@ def classify():
                        ('clf', MLPClassifier(hidden_layer_sizes=(100, 100, 100), max_iter=500, alpha=0.0001,
                                              solver='sgd', verbose=10, random_state=21, tol=0.000000001))
                        ])
+
     # /////////////// K-Nearest Neighbor optimizing ////////////// #
 
     # myList = list(range(1, 20))
@@ -189,17 +189,17 @@ def classify():
     # end = time.time()
     # print("LGR + HashVect: Accuracy: %0.2f (+/- %0.2f) | dt = %f s" % (scores.mean(), scores.std() * 2, float(end - start)))
 
-    start = time.time()
-    scores = cross_val_score(cl_rf1, x_train, y_train, cv=10)
-    accrf = scores.mean()
-    end = time.time()
-    print("RF + CountVect: Accuracy: %0.2f (+/- %0.2f) | dt = %f s" % (scores.mean(), scores.std() * 2, float(end - start)))
-
-    start = time.time()
-    scores = cross_val_score(cl_rf2, x_train, y_train, cv=10)
-    accrf = scores.mean()
-    end = time.time()
-    print("RF + HashVect: Accuracy: %0.2f (+/- %0.2f) | dt = %f s" % (scores.mean(), scores.std() * 2, float(end - start)))
+    # start = time.time()
+    # scores = cross_val_score(cl_rf1, x_train, y_train, cv=10)
+    # accrf = scores.mean()
+    # end = time.time()
+    # print("RF + CountVect: Accuracy: %0.2f (+/- %0.2f) | dt = %f s" % (scores.mean(), scores.std() * 2, float(end - start)))
+    #
+    # start = time.time()
+    # scores = cross_val_score(cl_rf2, x_train, y_train, cv=10)
+    # accrf = scores.mean()
+    # end = time.time()
+    # print("RF + HashVect: Accuracy: %0.2f (+/- %0.2f) | dt = %f s" % (scores.mean(), scores.std() * 2, float(end - start)))
 
     # start = time.time()
     # scores = cross_val_score(cl_mlp, x_train, y_train, cv=10)
@@ -210,9 +210,10 @@ def classify():
     # start = time.time()
     # predict(cl_knn2, x_train, target_cat, 1)
     # end = time.time()
-    # start = time.time()
-    # predict(cl_rf1, x_train, target_cat, 2)
-    # end = time.time()
+    start = time.time()
+    predict(cl_rf1, x_train, target_cat, 2)
+    end = time.time()
+    print float(end-start)
     # start = time.time()
     # predict(cl_rf2, x_train, target_cat, 3)
     # end = time.time()
@@ -229,7 +230,9 @@ def predict(clf, x_train,  target_cat,i):
     clf.fit(x_train,  target_cat)
     test = testdata['cells']
     predictions = clf.predict(test)
-    with open('testSet_JourneyPatternIDs'+str(i)+'.csv', 'w') as csvfile:
+
+    # with open('testSet_JourneyPatternIDs'+str(i)+'.csv', 'w') as csvfile:
+    with open('testSet_JourneyPatternIDs.csv', 'w') as csvfile:
 
         fieldnames=['Test_Trip_ID',  'Predicted_JourneyPatternID']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter='\t')
