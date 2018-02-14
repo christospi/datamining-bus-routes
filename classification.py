@@ -6,7 +6,7 @@ BigDataMining - Part 2.BC
 
 import ast
 import csv
-
+import matplotlib as plt
 import time
 from sklearn import preprocessing
 from sklearn.decomposition import TruncatedSVD
@@ -109,8 +109,8 @@ def classify():
         target_cat.append(jid)
 
 
-    countVect = CountVectorizer(tokenizer=my_tokenizer)
-    hashVect = HashingVectorizer(tokenizer=my_tokenizer)
+    countVect = CountVectorizer(tokenizer=my_tokenizer, ngram_range=(1,2))
+    hashVect = HashingVectorizer(tokenizer=my_tokenizer, ngram_range=(1,2))
 
     # Count Vectorizer + KNN
     cl_knn1 = Pipeline([('vect', countVect),
@@ -136,30 +136,58 @@ def classify():
                        ('clf', MLPClassifier(hidden_layer_sizes=(100, 100, 100), max_iter=500, alpha=0.0001,
                                              solver='sgd', verbose=10, random_state=21, tol=0.000000001))
                        ])
+    # /////////////// K-Nearest Neighbor optimizing ////////////// #
 
-    start = time.time()
-    scores = cross_val_score(cl_knn1, x_train, y_train, cv=10)
-    accrf = scores.mean()
-    end = time.time()
-    print("KNN + CountVect: Accuracy: %0.2f (+/- %0.2f) | dt = %f s" % (scores.mean(), scores.std() * 2, float(end - start)))
+    # myList = list(range(1, 20))
+    # cv_scores = []
+    # neighbors = filter(lambda x: x % 2 != 0, myList)
+    # for k in neighbors:
+    #     start = time.time()
+    #     cl_knn2 = Pipeline([('vect', hashVect),
+    #                         ('clf', KNeighborsClassifier(n_neighbors=k))])
+    #
+    #     scores = cross_val_score(cl_knn2, x_train, y_train, cv=10, scoring='accuracy')
+    #     cv_scores.append(scores.mean())
+    #     end = time.time()
+    #     print("KNN + HashVect with %d neighbors: Accuracy: %0.2f (+/- %0.2f) | dt = %f s" % ( k,
+    #     scores.mean(), scores.std() * 2, float(end - start)))
+    # MSE = [1 - x for x in cv_scores]
+    #
+    # # determining best k
+    # optimal_k = neighbors[MSE.index(min(MSE))]
+    # print "The optimal number of neighbors is %d" % optimal_k
+    #
+    # # plot misclassification error vs k
+    # plt.plot(neighbors, MSE)
+    # plt.xlabel('Number of Neighbors K')
+    # plt.ylabel('Misclassification Error')
+    # plt.show()
 
-    start = time.time()
-    scores = cross_val_score(cl_knn2, x_train, y_train, cv=10)
-    accrf = scores.mean()
-    end = time.time()
-    print("KNN + HashVect: Accuracy: %0.2f (+/- %0.2f) | dt = %f s" % (scores.mean(), scores.std() * 2, float(end - start)))
+    # /////////////// K-Nearest Neighbor optimizing ////////////// #
 
-    start = time.time()
-    scores = cross_val_score(cl_lgr1, x_train, y_train, cv=10)
-    accrf = scores.mean()
-    end = time.time()
-    print("LGR + CountVect: Accuracy: %0.2f (+/- %0.2f) | dt = %f s" % (scores.mean(), scores.std() * 2, float(end - start)))
-
-    start = time.time()
-    scores = cross_val_score(cl_lgr2, x_train, y_train, cv=10)
-    accrf = scores.mean()
-    end = time.time()
-    print("LGR + HashVect: Accuracy: %0.2f (+/- %0.2f) | dt = %f s" % (scores.mean(), scores.std() * 2, float(end - start)))
+    # start = time.time()
+    # scores = cross_val_score(cl_knn1, x_train, y_train, cv=10)
+    # accrf = scores.mean()
+    # end = time.time()
+    # print("KNN + CountVect: Accuracy: %0.2f (+/- %0.2f) | dt = %f s" % (scores.mean(), scores.std() * 2, float(end - start)))
+    #
+    # start = time.time()
+    # scores = cross_val_score(cl_knn2, x_train, y_train, cv=10)
+    # accrf = scores.mean()
+    # end = time.time()
+    # print("KNN + HashVect: Accuracy: %0.2f (+/- %0.2f) | dt = %f s" % (scores.mean(), scores.std() * 2, float(end - start)))
+    #
+    # start = time.time()
+    # scores = cross_val_score(cl_lgr1, x_train, y_train, cv=10)
+    # accrf = scores.mean()
+    # end = time.time()
+    # print("LGR + CountVect: Accuracy: %0.2f (+/- %0.2f) | dt = %f s" % (scores.mean(), scores.std() * 2, float(end - start)))
+    #
+    # start = time.time()
+    # scores = cross_val_score(cl_lgr2, x_train, y_train, cv=10)
+    # accrf = scores.mean()
+    # end = time.time()
+    # print("LGR + HashVect: Accuracy: %0.2f (+/- %0.2f) | dt = %f s" % (scores.mean(), scores.std() * 2, float(end - start)))
 
     start = time.time()
     scores = cross_val_score(cl_rf1, x_train, y_train, cv=10)
