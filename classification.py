@@ -207,21 +207,17 @@ def classify():
     # end = time.time()
     # print("cl_mlp: Accuracy: %0.2f (+/- %0.2f) | dt = %f s" % (scores.mean(), scores.std() * 2, float(end - start)))
 
-    # start = time.time()
-    # predict(cl_knn2, x_train, target_cat, 1)
-    # end = time.time()
+
     start = time.time()
-    predict(cl_rf1, x_train, target_cat, 2)
+    predict(cl_rf1, x_train, target_cat)
     end = time.time()
     print float(end-start)
     # start = time.time()
-    # predict(cl_rf2, x_train, target_cat, 3)
+    # predict(cl_knn2, x_train, target_cat)
     # end = time.time()
-    # start = time.time()
-    # predict(cl_knn1, x_train, target_cat, 4)
-    # end = time.time()
+
 ########################################################################################################################
-def predict(clf, x_train,  target_cat,i):
+def predict(clf, x_train,  target_cat):
     testdata = pd.read_csv('C_test.csv')
     # target_cat = np.array(target_cat)
     test_tripid = []
